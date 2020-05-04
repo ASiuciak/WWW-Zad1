@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+</head>
+<body>
+    <div>
+        <header>Liczyć każdy może</header>
+        <p>To jest quiz algebraiczny. Naciśnij poniższy przycisk, aby przystąpić do jego rozwiązania.</p>
+        <form action="quiz.html">
+            <button type="submit">Rozpocznij Quiz</button>
+        </form>
+        <br><br>
+        <section>
+            <strong>Najlepsze wyniki:</strong>
+            <ul id="best">
+                <li id="best1"></li>
+                <li id="best2"></li>
+                <li id="best3"></li>
+            </ul>
+        </section>
+        <button onclick="reset()">Resetuj najlepsze wyniki</button>
+        <button onclick="showResults()">Wyświetl statystyki wszystkich podejsć na konsoli</button>
+    <div>
+</body>
+<script src='list.js'></script>
+</html>

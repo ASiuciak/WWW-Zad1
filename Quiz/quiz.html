@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Quiz</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='quiz.css'>
+</head>
+<body>
+    <div id ="intro">
+        <header>Zasady quizu</header>
+        <ul id="rules">
+            <li>masz do rozwiązania 4 zadania algebraiczne</li>
+            <li>wpisuj wyniki działań (w postaci liczb całkowitych) w pola do tego przeznaczone</li>
+            <li>możesz dowolnie przechodzić między zadaniami za pomocą przycisków "Następne" i "Poprzednie"</li>
+            <li>udzielenie błędnej odpowiedzi skutkuje karnymi sekundami (każde pytanie ma wyznaczoną ilość karnych sekund)</li>
+            <li>twój wynik to suma czasu spędzonego nad rozwiązywaniem quizu i otrzymanych sekund karnych</li>
+            <li>naciśnięcie przycisku "Stop" możliwe jest dopiero po udzieleniu odpowiedzi na wszystkie pytania, zatwierdza ono wszystkie odpowiedzi, kończy quiz i zapisuje jego wynik</li>
+            <li>naciśnięcie przycisku "Anuluj" kończy quiz bez zapisywania wyniku</li>
+        </ul>
+        <div id="button">
+            <button id="start" onclick="start()">Start</button>
+        </div>
+        <button id="main" onclick="back()">Strona główna</button>
+    </div>
+    <div id="quiz">
+        <p id="timer">0:00</p>
+        <header id="number"></header>
+        <p id="penalty"></p>
+        <p id="text"></p>
+        <button class="scroll" onclick="previous()" disabled="disabled">Poprzednie</button>
+        <input type="text" id="input" oninput="checkIfCompleted()">
+        <button class="scroll" onclick="next()">Następne</button><br><br>
+        <button id="stop" onclick="finish()" disabled="disabled">Stop</button><br>
+        <form action="quiz.html">
+            <button id="cancel" type="submit">Anuluj</button>
+        </form>
+    </div>
+    <div id="results"></div>
+    <figure id="img">
+        <img src="picture.png" id="pic">
+    </figure>
+</body>
+<script src='main.js'></script>
+</html>
