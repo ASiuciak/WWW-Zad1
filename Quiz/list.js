@@ -21,7 +21,7 @@ function reset() {
     localStorage.removeItem("best1");
     localStorage.removeItem("best2");
     localStorage.removeItem("best3");
-    updateList();
+    window.location.reload();
 }
 // Wyświetla statystyki wszystkich podejść na konsoli
 function showResults() {
