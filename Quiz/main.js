@@ -3,27 +3,34 @@
 var example = [{ "task": "2 + 2 * 2 = ", "solution": 6, "penalty": 7 },
     { "task": "3 - (-6 : 2) = ", "solution": 6, "penalty": 15 },
     { "task": "14 - 4 + 6 * 2 - 91 : 13 = ", "solution": 15, "penalty": 50 },
-    { "task": "4 * 6 : 8 + 10 = ", "solution": 13, "penalty": 25 }];
+    { "task": "4 * 6 : 8 + 10 = ", "solution": 13, "penalty": 25 },
+    { "task": "12 + (111 - 8 * 7) = ", "solution": 67, "penalty": 30 }
+];
 localStorage.setItem("quiz", JSON.stringify(example));
-/* Odczytuje 4 - zadaniowy quiz z local storage
+/* Odczytuje quiz z local storage
  * i zapisuje informacje o nim w zmiennych lokalnych.
  */
-var texts = ["", "", "", ""];
-var correct = [0, 0, 0, 0];
-var penalties = [0, 0, 0, 0];
+var texts = [];
+var correct = [];
+var penalties = [];
 var quiz = JSON.parse(localStorage.getItem("quiz"));
-for (var i = 0; i < 4; ++i) {
-    texts[i] = quiz[i]["task"];
-    correct[i] = quiz[i]["solution"];
-    penalties[i] = quiz[i]["penalty"];
+for (var i = 0; i < quiz.length; ++i) {
+    texts.push(quiz[i]["task"]);
+    correct.push(quiz[i]["solution"]);
+    penalties.push(quiz[i]["penalty"]);
 }
+var size = quiz.length;
 // Ustawia zmienne globalbe opisujące przebieg rozwiązywania quizu.
-var answers = new Array(); //odpowiedzi użytkownika na każde z 4 pytań
+var answers = new Array(size); //odpowiedzi użytkownika na każde z pytań
 var page = 0; //aktualnie wyświetlane pytanie (indeksowane od 0)
 var total = 0; //całkowity czas rozwiązywanie quizu
 var penTotal = 0; //suma kar dla aktualnego rozwiązania
-var lastEnter = [0, 0, 0, 0]; //czasy ostatnich wyświetleń pytań (s)
-var taskTimes = [0, 0, 0, 0]; //sumy czasów wyświetlania pytań (s)
+var lastEnter = []; //czasy ostatnich wyświetleń pytań (s)
+var taskTimes = []; //sumy czasów wyświetlania pytań (s)
+for (var i = 0; i < size; i++) {
+    lastEnter.push(0);
+    taskTimes.push(0);
+}
 var secs = 0; //sekundy od rozpoczęcia quizu
 var timer = null; //będzie przechowywć ID interwału z czasomierzem
 // Tworzymy pustą tablicę wyników w localstorage, o ile jeszcze nie istnieje.
@@ -38,6 +45,15 @@ function notEmpty(element) {
         return false;
     }
     return true;
+}
+function arrayNotEmpty(array) {
+    var empty = false;
+    for (var i = 0; i < array.length && !empty; i++) {
+        if (!notEmpty(array[i])) {
+            empty = true;
+        }
+    }
+    return empty;
 }
 // Zamienia czas podany w sekundach na napis go reprezentujący (np. 64 -> 1:04)
 function secondsToString(time) {
@@ -107,7 +123,7 @@ function next() {
     var n = document.getElementsByClassName("scroll")[1];
     var p = document.getElementsByClassName("scroll")[0];
     p.disabled = false;
-    if (page === 3) {
+    if (page === size - 1) {
         n.disabled = true;
     }
 }
@@ -153,8 +169,7 @@ function takeAnswer() {
 function checkIfCompleted() {
     takeAnswer();
     var button = document.getElementById("stop");
-    if (notEmpty(answers[0]) && notEmpty(answers[1]) &&
-        notEmpty(answers[2]) && notEmpty(answers[3])) {
+    if (!arrayNotEmpty(answers)) {
         button.disabled = false;
     }
     else {
@@ -201,8 +216,7 @@ function isTopResult(time) {
   */
 function saveResultOnly(time) {
     isTopResult(time);
-    var res = { date: null, time1: null, time2: null, time3: null,
-        time4: null, penalties: null, total: time };
+    var res = { date: null, times: null, penalties: null, total: time };
     var list = JSON.parse(localStorage.getItem("results"));
     list.push(res);
     localStorage.setItem("results", JSON.stringify(list));
@@ -210,9 +224,7 @@ function saveResultOnly(time) {
 // Zapisuje wynik i statystyki w localstorage.
 function saveResultAndStats(taskTimes, penTime, time) {
     isTopResult(time);
-    var res = { date: new Date().toString(), time1: taskTimes[0],
-        time2: taskTimes[1], time3: taskTimes[2],
-        time4: taskTimes[3], penalties: penTime, total: time };
+    var res = { date: new Date().toString(), times: taskTimes, penalties: penTime, total: time };
     var list = JSON.parse(localStorage.getItem("results"));
     list.push(res);
     localStorage.setItem("results", JSON.stringify(list));
@@ -251,7 +263,7 @@ function finish() {
     // Liczymy całkowity czas rozwiązywania (suma czasów ze wszystkich zadań)
     var endTime = secs;
     taskTimes[page] += endTime - lastEnter[page];
-    for (var i = 0; i < 4; ++i) {
+    for (var i = 0; i < size; ++i) {
         total += taskTimes[i];
     }
     // Ukrywamy kontener z quizem, uzupełniamy i wyświetlamy ten z wynikami.
@@ -266,7 +278,7 @@ function finish() {
      * Zadania zrobione dobrze wyświetlamy na zielono, źle na czerwono,
      * z podaniem poprawnej i błędenj odpowiedzi.
      */
-    for (var i = 0; i < 4; ++i) {
+    for (var i = 0; i < size; ++i) {
         var newPara = document.createElement('p');
         newPara.style.fontSize = "25px";
         var solution = texts[i] + correct[i];

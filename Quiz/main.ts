@@ -4,29 +4,37 @@
 let example = [{"task": "2 + 2 * 2 = ", "solution": 6, "penalty": 7},
                {"task": "3 - (-6 : 2) = ", "solution": 6, "penalty": 15},
                {"task": "14 - 4 + 6 * 2 - 91 : 13 = ", "solution": 15, "penalty": 50},
-               {"task": "4 * 6 : 8 + 10 = ", "solution": 13, "penalty": 25}];
+               {"task": "4 * 6 : 8 + 10 = ", "solution": 13, "penalty": 25},
+               {"task": "12 + (111 - 8 * 7) = ", "solution": 67, "penalty": 30}
+              ];
 localStorage.setItem("quiz", JSON.stringify(example));
 
-/* Odczytuje 4 - zadaniowy quiz z local storage
+/* Odczytuje quiz z local storage
  * i zapisuje informacje o nim w zmiennych lokalnych.
  */
-let texts : string[] = ["", "", "", ""];
-let correct : number[] = [0, 0, 0, 0];
-let penalties : number[] = [0, 0, 0, 0];
+let texts = [];
+let correct = [];
+let penalties = [];
 let quiz = JSON.parse(localStorage.getItem("quiz"));
-for (var i = 0; i < 4; ++i) {
-    texts[i] = quiz[i]["task"];
-    correct[i] = quiz[i]["solution"];
-    penalties[i] = quiz[i]["penalty"];
+for (var i = 0; i < quiz.length; ++i) {
+    texts.push(quiz[i]["task"]);
+    correct.push(quiz[i]["solution"]);
+    penalties.push(quiz[i]["penalty"]);
 }
 
+let size = quiz.length;
+
 // Ustawia zmienne globalbe opisujące przebieg rozwiązywania quizu.
-let answers = new Array(); //odpowiedzi użytkownika na każde z 4 pytań
+let answers = new Array(size); //odpowiedzi użytkownika na każde z pytań
 let page = 0; //aktualnie wyświetlane pytanie (indeksowane od 0)
 let total = 0; //całkowity czas rozwiązywanie quizu
 let penTotal = 0; //suma kar dla aktualnego rozwiązania
-let lastEnter : number[] = [0, 0, 0, 0]; //czasy ostatnich wyświetleń pytań (s)
-let taskTimes : number[] = [0, 0, 0, 0]; //sumy czasów wyświetlania pytań (s)
+let lastEnter = []; //czasy ostatnich wyświetleń pytań (s)
+let taskTimes = []; //sumy czasów wyświetlania pytań (s)
+for (var i = 0; i < size; i++) {
+    lastEnter.push(0);
+    taskTimes.push(0);
+}
 let secs = 0; //sekundy od rozpoczęcia quizu
 let timer = null; //będzie przechowywć ID interwału z czasomierzem
 
@@ -42,10 +50,7 @@ if (!notEmpty(localStorage.getItem("results"))) {
 // Struktura reprezentująca statystyki 1 podejścia do quizu.
 interface result{
     date: string;
-    time1: number;
-    time2: number;
-    time3: number;
-    time4: number;
+    times: number[];
     penalties: number;
     total: number;
 }
@@ -59,6 +64,16 @@ function notEmpty(element) {
         return false;
     }
     return true;
+}
+
+function arrayNotEmpty(array) {
+    let empty = false;
+    for (var i = 0; i < array.length && !empty; i++) {
+        if (!notEmpty(array[i])) {
+            empty = true;
+        }
+    }
+    return empty;
 }
 
 // Zamienia czas podany w sekundach na napis go reprezentujący (np. 64 -> 1:04)
@@ -136,7 +151,7 @@ function next() {
     let n = <HTMLInputElement> document.getElementsByClassName("scroll")[1];
     let p = <HTMLInputElement> document.getElementsByClassName("scroll")[0];
     p.disabled = false;
-    if (page === 3) {
+    if (page === size - 1) {
         n.disabled = true;
     }
 }
@@ -184,8 +199,7 @@ function takeAnswer() {
 function checkIfCompleted() {
     takeAnswer();
     let button = <HTMLInputElement> document.getElementById("stop");
-    if (notEmpty(answers[0]) && notEmpty(answers[1]) &&
-       notEmpty(answers[2]) && notEmpty(answers[3])) {
+    if (!arrayNotEmpty(answers)) {
         button.disabled = false;
     } else {
         button.disabled = true;
@@ -231,8 +245,7 @@ function isTopResult(time) {
   */
 function saveResultOnly(time) {
     isTopResult(time);
-    let res : result = {date: null, time1: null, time2: null, time3: null,
-                       time4: null, penalties: null, total: time};
+    let res : result = {date: null, times: null, penalties: null, total: time};
     let list = JSON.parse(localStorage.getItem("results"));
     list.push(res);
     localStorage.setItem("results", JSON.stringify(list));
@@ -241,9 +254,7 @@ function saveResultOnly(time) {
 // Zapisuje wynik i statystyki w localstorage.
 function saveResultAndStats(taskTimes, penTime, time) {
     isTopResult(time);
-    let res : result = {date: new Date().toString(), time1: taskTimes[0],
-                       time2: taskTimes[1], time3: taskTimes[2],
-                       time4: taskTimes[3], penalties: penTime, total: time};
+    let res : result = {date: new Date().toString(), times: taskTimes, penalties: penTime, total: time};
     let list = JSON.parse(localStorage.getItem("results"));
     list.push(res);
     localStorage.setItem("results", JSON.stringify(list));
@@ -287,7 +298,7 @@ function finish() {
     // Liczymy całkowity czas rozwiązywania (suma czasów ze wszystkich zadań)
     let endTime = secs;
     taskTimes[page] += endTime - lastEnter[page];
-    for (var i = 0; i < 4; ++i) {
+    for (var i = 0; i < size; ++i) {
         total += taskTimes[i];
     }
 
@@ -304,7 +315,7 @@ function finish() {
      * Zadania zrobione dobrze wyświetlamy na zielono, źle na czerwono,
      * z podaniem poprawnej i błędenj odpowiedzi.
      */
-    for (var i = 0; i < 4; ++i) {
+    for (var i = 0; i < size; ++i) {
         let newPara = document.createElement('p');
         newPara.style.fontSize = "25px";
         let solution = texts[i] + correct[i];
